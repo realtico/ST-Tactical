@@ -36,9 +36,15 @@ bool Terminal_Init(int cols, int rows, const char *fontPath, int fontSize) {
     memset(term.VRAM_Front, 0, cols * rows * sizeof(VRAMCell));
     memset(term.VRAM_Back, 0, cols * rows * sizeof(VRAMCell));
 
-    // Carregar fonte monoespaçada
-    term.font = LoadFontEx(fontPath, fontSize, 0, 250);
-    SetTextureFilter(term.font.texture, TEXTURE_FILTER_BILINEAR); // Modern clear font
+    // Montar mapa de codepoints para incluir Box Drawing (0x2500 - 0x257F) e Block Elements (0x2580 - 0x259F)
+    int codepoints[512];
+    int count = 0;
+    for (int i = 32; i < 127; i++) codepoints[count++] = i;
+    for (int i = 0; i < 256; i++) codepoints[count++] = 0x2500 + i; // Inclui Box e Block inteiro
+    
+    // Carregar fonte monoespaçada com nosso mapa
+    term.font = LoadFontEx(fontPath, fontSize, codepoints, count);
+    SetTextureFilter(term.font.texture, TEXTURE_FILTER_POINT); // Modern clear font
 
     // Calcular tamanho de cada caractere na tela (assumimos fonte mono)
     Vector2 mSize = MeasureTextEx(term.font, "M", fontSize, 0);
@@ -47,7 +53,7 @@ bool Terminal_Init(int cols, int rows, const char *fontPath, int fontSize) {
 
     // RenderTexture usando os tamanhos da VRAM * tam do char
     term.renderTarget = LoadRenderTexture(cols * term.charWidth, rows * term.charHeight);
-    SetTextureFilter(term.renderTarget.texture, TEXTURE_FILTER_BILINEAR); // Suavizar no upscaling
+    SetTextureFilter(term.renderTarget.texture, TEXTURE_FILTER_POINT); // Suavizar no upscaling
 
     // Paleta padrão retro (ANSI base + grayscale)
     for(int i = 0; i < MAX_COLORS; i++){
@@ -114,7 +120,7 @@ void Terminal_Resize(int cols, int rows) {
 
     UnloadRenderTexture(term.renderTarget);
     term.renderTarget = LoadRenderTexture(term.cols * term.charWidth, term.rows * term.charHeight);
-    SetTextureFilter(term.renderTarget.texture, TEXTURE_FILTER_BILINEAR);
+    SetTextureFilter(term.renderTarget.texture, TEXTURE_FILTER_POINT);
 }
 
 void Terminal_SetPaletteColor(uint8_t index, uint32_t color_hex) {
@@ -130,7 +136,7 @@ void Terminal_Clear(uint8_t bg_color) {
     }
 }
 
-void Terminal_SetCell(int x, int y, char glyph, uint8_t fg, uint8_t bg, uint8_t attr) {
+void Terminal_SetCell(int x, int y, int glyph, uint8_t fg, uint8_t bg, uint8_t attr) {
     if (x < 0 || x >= term.cols || y < 0 || y >= term.rows) return;
     int idx = y * term.cols + x;
     term.VRAM_Back[idx].glyph = glyph;
@@ -175,9 +181,39 @@ void Terminal_Render(void) {
                     continue; // Skip rendering text Se blink visível estiver off
                 }
 
-                char str[2] = { cell.glyph, '\0' };
+                // Skip char str array
                 Vector2 pos = { (float)x * term.charWidth, (float)y * term.charHeight };
                 Color fColor = term.palette[cell.fg];
+
+                // Intercept Box Drawing and Full Block for pixel-perfect tile without gaps
+                if ((cell.glyph >= 0x2500 && cell.glyph <= 0x257F) || cell.glyph == 0x2588) {
+                    int cx = x * term.charWidth + term.charWidth / 2;
+                    int cy = y * term.charHeight + term.charHeight / 2;
+                    int px = x * term.charWidth;
+                    int py = y * term.charHeight;
+                    int cw = term.charWidth;
+                    int ch = term.charHeight;
+                    int lw = 2; // line thickness
+                    int cw_half = term.charWidth / 2;
+                    int ch_half = term.charHeight / 2;
+
+                    if (cell.glyph == 0x2588) { // BLOCK_FULL
+                        DrawRectangle(px, py, cw, ch, fColor);
+                    } else {
+                        // Horizontal spans
+                        bool left  = (cell.glyph == 0x2500 || cell.glyph == 0x2510 || cell.glyph == 0x2518 || cell.glyph == 0x2524 || cell.glyph == 0x252C || cell.glyph == 0x2534 || cell.glyph == 0x253C);
+                        bool right = (cell.glyph == 0x2500 || cell.glyph == 0x250C || cell.glyph == 0x2514 || cell.glyph == 0x251C || cell.glyph == 0x252C || cell.glyph == 0x2534 || cell.glyph == 0x253C);
+                        // Vertical spans
+                        bool up    = (cell.glyph == 0x2502 || cell.glyph == 0x2514 || cell.glyph == 0x2518 || cell.glyph == 0x251C || cell.glyph == 0x2524 || cell.glyph == 0x2534 || cell.glyph == 0x253C);
+                        bool down  = (cell.glyph == 0x2502 || cell.glyph == 0x250C || cell.glyph == 0x2510 || cell.glyph == 0x251C || cell.glyph == 0x2524 || cell.glyph == 0x252C || cell.glyph == 0x253C);
+
+                        if (left)  DrawRectangle(px, cy - 1, cw_half, lw, fColor);
+                        if (right) DrawRectangle(px + cw_half, cy - 1, cw - cw_half, lw, fColor);
+                        if (up)    DrawRectangle(cx - 1, py, lw, ch_half, fColor);
+                        if (down)  DrawRectangle(cx - 1, py + ch_half, lw, ch - ch_half, fColor);
+                    }
+                    continue; // Skip font renderer for these
+                }
 
                 // Skew per Italic via transform local
                 bool isItalic = (cell.attr & ATTR_ITALIC) != 0;
@@ -204,21 +240,21 @@ void Terminal_Render(void) {
                     rlMultMatrixf(m);
                     
                     Vector2 localPos = { (term.charHeight*0.2f), 0.0f }; // ajustar baseline se precisar
-                    DrawTextEx(term.font, str, localPos, term.font.baseSize, 0, fColor);
+                    DrawTextCodepoint(term.font, cell.glyph, localPos, term.font.baseSize, fColor);
                     
                     if (cell.attr & ATTR_BOLD) {
                         Vector2 localPosB = { localPos.x + 1.0f, localPos.y };
-                        DrawTextEx(term.font, str, localPosB, term.font.baseSize, 0, fColor);
+                        DrawTextCodepoint(term.font, cell.glyph, localPosB, term.font.baseSize, fColor);
                     }
                     
                     rlPopMatrix();
                 } else {
                     // Normal text
-                    DrawTextEx(term.font, str, pos, term.font.baseSize, 0, fColor);
+                    DrawTextCodepoint(term.font, cell.glyph, pos, term.font.baseSize, fColor);
                     // Bold (Overstrike 1px X)
                     if (cell.attr & ATTR_BOLD) {
                         Vector2 posB = { pos.x + 1.0f, pos.y };
-                        DrawTextEx(term.font, str, posB, term.font.baseSize, 0, fColor);
+                        DrawTextCodepoint(term.font, cell.glyph, posB, term.font.baseSize, fColor);
                     }
                 }
             }

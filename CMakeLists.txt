@@ -31,6 +31,8 @@ FetchContent_MakeAvailable(raylib)
 set(SOURCES
     "src/video/terminal.c"
     "src/video/test_video.c"
+    "src/game/galaxy.c"
+    "src/game/dashboard.c"
 )
 
 add_executable(${PROJECT_NAME} ${SOURCES})
@@ -41,6 +43,10 @@ target_include_directories(${PROJECT_NAME} PRIVATE "include")
 # Link Raylib to our executable
 # The Raylib target provided by FetchContent is usually just 'raylib'
 target_link_libraries(${PROJECT_NAME} PRIVATE raylib)
+
+# Galaxy Generator / Dumper Executable
+add_executable(GalaxyDumper "src/game/test_galaxy.c" "src/game/galaxy.c")
+target_include_directories(GalaxyDumper PRIVATE "include")
 
 # Copy assets folder to output directory to make it easier to run
 # Post-build step to copy the assets folder to the binary directory

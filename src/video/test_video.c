@@ -1,10 +1,42 @@
 #include <raylib.h>
 #include "video/terminal.h"
+#include "game/dashboard.h"
+#include "game/enterprise.h"
 #include <stdio.h>
+#include <string.h>
 
 // Tela 80x25 char (com JetBrains Mono de std 16px, dá 80*9, 25*16 aprox)
 // Vamos escalar em 2x pra ver melhor, então janela 1280x720, virtual 80x25.
 #define SCALE 2
+
+void DrawMockupDashboard(ScanMode mode) {
+    Enterprise ent;
+    memset(&ent, 0, sizeof(Enterprise));
+    ent.stardate = 3421.5;
+    ent.quadX = 6;
+    ent.quadY = 6;
+    ent.sectX = 4;
+    ent.sectY = 2;
+    
+    ent.energyMax = 5000;
+    ent.energy = 3500;
+    ent.shieldsMax = 100; // Porcentagem
+    ent.shields = 21;
+    ent.torpedoesMax = 10;
+    ent.torpedoes = 10;
+    
+    strcpy(ent.condition, "RED");
+    
+    ent.sysWarp = 1.0f;
+    ent.sysPhaser = 1.0f;
+    ent.sysSensor = 1.0f;
+    ent.sysLRS = 1.0f;
+    ent.sysComputer = 1.0f;
+
+    Dashboard_DrawTemplate();
+    Dashboard_DrawEnterpriseStats(&ent);
+    Dashboard_DrawScan(mode, &ent);
+}
 
 void FillStressTest() {
     int rows = 25; // default fallback, a usar GetScreen height params on resize depois, simulado
@@ -69,6 +101,9 @@ int main(void) {
     int currentCols = 80;
     int currentRows = 25;
 
+    // Gerar uma galáxia de teste!
+    Galaxy_Generate(1701);
+
     while (!WindowShouldClose()) {
 
         // Tratamento do Controle do Cursor
@@ -86,60 +121,28 @@ int main(void) {
             currentCols = 100; currentRows = 32;
             Terminal_Resize(currentCols, currentRows);
         }
-        if (IsKeyPressed(KEY_THREE)) {
-            currentCols = 132; currentRows = 42;
-            Terminal_Resize(currentCols, currentRows);
+        
+        static ScanMode currentMockupMode = SCAN_MODE_LRS;
+        if (IsKeyPressed(KEY_SPACE)) {
+            currentMockupMode = (currentMockupMode == SCAN_MODE_LRS) ? SCAN_MODE_SRS : SCAN_MODE_LRS;
         }
-
-        // Logic - Escreve no DB VRAM_Back
+        
         Terminal_Clear(0);
+        DrawMockupDashboard(currentMockupMode);
         
-        // Desenha o Stress Test por baixo
-        // Simulação do preenchimento fixo via func, que se adapta ao tamanho manual aq
-        char c = '!';
-        for (int y = 5; y < currentRows; y++) {
-            for (int x = 0; x < currentCols; x++) {
-                uint8_t fg = (x % 14) + 1;
-                uint8_t bg = (y % 14) + 1;
-                if (fg == bg) fg = (fg + 1) % 15;
-                Terminal_SetCell(x, y, c, fg, bg, 0);
-                c++;
-                if (c > '~') c = '!';
-            }
-        }
-        const char *m1 = "ZENIT-VIDEO HARDWARE TEST";
-        for(int i=0; m1[i] != '\0'; i++) Terminal_SetCell(2+i, 1, m1[i], 15, 0, 0);
-
-        const char *m2 = "Negrito (BOLD) Teste ...";
-        for(int i=0; m2[i] != '\0'; i++) Terminal_SetCell(2+i, 2, m2[i], 10, 0, ATTR_BOLD);
-
-        const char *m3 = "Italico (ITALIC) Teste ...";
-        for(int i=0; m3[i] != '\0'; i++) Terminal_SetCell(2+i, 3, m3[i], 11, 0, ATTR_ITALIC);
-
-        const char *m4 = "Piscante (BLINK) Teste ...";
-        for(int i=0; m4[i] != '\0'; i++) Terminal_SetCell(2+i, 4, m4[i], 12, 0, ATTR_BLINK);
-        
-        // Modifica a cor de quem está em baixo do Cursor
         VRAMCell cell = Terminal_GetCell(cursorX, cursorY);
-        // Inverter e colocar cursor '_ ' (under)
         Terminal_SetCell(cursorX, cursorY, '_', cell.bg, cell.fg, ATTR_BLINK | ATTR_BOLD);
-
-
+        
         Terminal_SwapBuffers();
 
-        // Renderização Raylib principal
         BeginDrawing();
             ClearBackground(BLACK);
-            
-            // Draw Virtual Terminal target texture stretched to the main Win
             Terminal_Render();
-
             DrawFPS(10, 10);
         EndDrawing();
     }
 
     Terminal_Close();
     CloseWindow();
-
     return 0;
 }

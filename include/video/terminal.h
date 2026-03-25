@@ -13,7 +13,7 @@
 #define MAX_COLORS  256
 
 typedef struct {
-    char glyph;     // Caractere ASCII
+    int glyph;      // Codepoint Unicode
     uint8_t fg;     // Índice de cor de frente
     uint8_t bg;     // Índice de cor de fundo
     uint8_t attr;   // Bitfield: [7:Blink | 6:Italic | 5:Bold | 0-4:Reservado]
@@ -32,7 +32,7 @@ void Terminal_Resize(int cols, int rows);
 void Terminal_Clear(uint8_t bg_color);
 
 // Modifica uma célula no VRAM_Back
-void Terminal_SetCell(int x, int y, char glyph, uint8_t fg, uint8_t bg, uint8_t attr);
+void Terminal_SetCell(int x, int y, int glyph, uint8_t fg, uint8_t bg, uint8_t attr);
 
 // Obtém uma célula no VRAM_Back
 VRAMCell Terminal_GetCell(int x, int y);
