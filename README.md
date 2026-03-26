@@ -5,7 +5,7 @@
 ## 🚀 Current Milestone: Card 0.0 (Zenit-Video Pack)
 At this stage, the project is building its "Virtual Hardware", effectively turning the viewport into a fully programmable, double-buffered visual text terminal. It removes any modern graphic capabilities from the game loop and imposes a rigid text-based grid (e.g., 80x25, 132x42) with strict palette rendering, blink, bold, and italic characteristics simulating a high-end modern terminal. 
 
-The terminal UI (Dashboard) accurately renders a complex grid of CP437/Unicode Box-Drawing blocks with pixel-perfect precision via Raylib backend, hosting the logic for LRS (Long Range Scan), SRS (Short Range Scan, implemented via a floating camera math over a continuous global sector grid), and basic Galaxy Generation mechanics (Deterministic LCG, Bestiary, and Quadrant distributions).
+The terminal UI (Dashboard) accurately renders a complex grid of CP437/Unicode Box-Drawing blocks with pixel-perfect precision via Raylib backend (with custom gapless rendering for both single and double box-drawing blocks), hosting the logic for LRS (Long Range Scan, dynamic 3x3 relative view), SRS (Short Range Scan, implemented via a floating 8x8 camera math over a continuous linear global 96x96 sector grid), and basic Galaxy Generation mechanics (Deterministic LCG, Bestiary, and Quadrant distributions).
 
 ## 🛠️ Build System
 

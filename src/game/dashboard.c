@@ -11,7 +11,19 @@
 #define C_RED    9    // 9 é Bright Red no terminal
 #define C_YELLOW 11   // 11 é Bright Yellow
 #define C_DGRAY  8
+
 #define C_CYAN   14   // 14 é Bright Cyan
+
+#define B_V_DBL  0x2551
+#define B_H_DBL  0x2550
+#define B_X_DBL  0x256C
+#define B_HD_DBL 0x2566
+#define B_HU_DBL 0x2569
+#define B_VR_DBL 0x2560
+#define B_VL_DBL 0x2563
+#define B_X_VD_HS 0x256B
+#define B_X_HD_VS 0x256A
+
 
 // Remapeando para Box Drawing Unicode de verdade agora que usamos 32-bit codepoints
 // Esses caracteres já estão cobertos pela JetBrainsMono nos bytes 0x2500+
@@ -79,59 +91,59 @@ void Dashboard_DrawTemplate(void) {
     
     // Top Row
     Terminal_SetCell(0, 0, B_TL, C_WHITE, C_BLACK, 0);
-    for(int x=1; x<=14; x++) Terminal_SetCell(x, 0, B_H, C_WHITE, C_BLACK, 0);
-    Terminal_SetCell(15, 0, B_HD, C_WHITE, C_BLACK, 0); // ┬
-    for(int x=16; x<=51; x++) Terminal_SetCell(x, 0, B_H, C_WHITE, C_BLACK, 0);
-    Terminal_SetCell(52, 0, B_HD, C_WHITE, C_BLACK, 0); // ┬
-    for(int x=53; x<=78; x++) Terminal_SetCell(x, 0, B_H, C_WHITE, C_BLACK, 0);
-    Terminal_SetCell(79, 0, B_TR, C_WHITE, C_BLACK, 0); // ┐
+    for(int x=1; x<=14; x++) Terminal_SetCell(x, 0, B_H, C_DGRAY, C_BLACK, 0);
+    Terminal_SetCell(15, 0, B_HD, C_DGRAY, C_BLACK, 0); // ┬
+    for(int x=16; x<=51; x++) Terminal_SetCell(x, 0, B_H, C_DGRAY, C_BLACK, 0);
+    Terminal_SetCell(52, 0, B_HD, C_DGRAY, C_BLACK, 0); // ┬
+    for(int x=53; x<=78; x++) Terminal_SetCell(x, 0, B_H, C_DGRAY, C_BLACK, 0);
+    Terminal_SetCell(79, 0, B_TR, C_DGRAY, C_BLACK, 0); // ┐
     
     // Header Titles
     DrawTextColor(1, 1, "  NAVIGATION  ", C_WHITE, C_BLACK, 0);
     DrawTextColor(53, 1, "         RESOURCES        ", C_WHITE, C_BLACK, 0);
-    Terminal_SetCell(0, 1, B_V, C_WHITE, C_BLACK, 0);
-    Terminal_SetCell(15, 1, B_V, C_WHITE, C_BLACK, 0);
-    Terminal_SetCell(52, 1, B_V, C_WHITE, C_BLACK, 0);
-    Terminal_SetCell(79, 1, B_V, C_WHITE, C_BLACK, 0);
+    Terminal_SetCell(0, 1, B_V, C_DGRAY, C_BLACK, 0);
+    Terminal_SetCell(15, 1, B_V, C_DGRAY, C_BLACK, 0);
+    Terminal_SetCell(52, 1, B_V, C_DGRAY, C_BLACK, 0);
+    Terminal_SetCell(79, 1, B_V, C_DGRAY, C_BLACK, 0);
 
     // Separators
-    Terminal_SetCell(0, 2, B_VR, C_WHITE, C_BLACK, 0);
-    for(int x=1; x<=14; x++) Terminal_SetCell(x, 2, B_H, C_WHITE, C_BLACK, 0);
-    Terminal_SetCell(15, 2, B_VL, C_WHITE, C_BLACK, 0);
+    Terminal_SetCell(0, 2, B_VR, C_DGRAY, C_BLACK, 0);
+    for(int x=1; x<=14; x++) Terminal_SetCell(x, 2, B_H, C_DGRAY, C_BLACK, 0);
+    Terminal_SetCell(15, 2, B_VL, C_DGRAY, C_BLACK, 0);
     
-    Terminal_SetCell(52, 2, B_VR, C_WHITE, C_BLACK, 0);
-    for(int x=53; x<=78; x++) Terminal_SetCell(x, 2, B_H, C_WHITE, C_BLACK, 0);
-    Terminal_SetCell(79, 2, B_VL, C_WHITE, C_BLACK, 0);
+    Terminal_SetCell(52, 2, B_VR, C_DGRAY, C_BLACK, 0);
+    for(int x=53; x<=78; x++) Terminal_SetCell(x, 2, B_H, C_DGRAY, C_BLACK, 0);
+    Terminal_SetCell(79, 2, B_VL, C_DGRAY, C_BLACK, 0);
 
     // Fill vertical borders for the rest of UI
     for (int y = 3; y < 19; y++) {
-        Terminal_SetCell(0, y, B_V, C_WHITE, C_BLACK, 0);
-        Terminal_SetCell(15, y, B_V, C_WHITE, C_BLACK, 0);
-        Terminal_SetCell(52, y, B_V, C_WHITE, C_BLACK, 0);
-        Terminal_SetCell(79, y, B_V, C_WHITE, C_BLACK, 0);
+        Terminal_SetCell(0, y, B_V, C_DGRAY, C_BLACK, 0);
+        Terminal_SetCell(15, y, B_V, C_DGRAY, C_BLACK, 0);
+        Terminal_SetCell(52, y, B_V, C_DGRAY, C_BLACK, 0);
+        Terminal_SetCell(79, y, B_V, C_DGRAY, C_BLACK, 0);
     }
     
     // Bottom border command prompt separator
-    Terminal_SetCell(0, 19, B_BL, C_WHITE, C_BLACK, 0);
-    for(int x=1; x<=14; x++) Terminal_SetCell(x, 19, B_H, C_WHITE, C_BLACK, 0);
-    Terminal_SetCell(15, 19, B_HU, C_WHITE, C_BLACK, 0);
-    for(int x=16; x<=51; x++) Terminal_SetCell(x, 19, B_H, C_WHITE, C_BLACK, 0);
+    Terminal_SetCell(0, 19, B_BL, C_DGRAY, C_BLACK, 0);
+    for(int x=1; x<=14; x++) Terminal_SetCell(x, 19, B_H, C_DGRAY, C_BLACK, 0);
+    Terminal_SetCell(15, 19, B_HU, C_DGRAY, C_BLACK, 0);
+    for(int x=16; x<=51; x++) Terminal_SetCell(x, 19, B_H, C_DGRAY, C_BLACK, 0);
     
     // Resources separator / Logs
-    Terminal_SetCell(52, 12, B_VR, C_WHITE, C_BLACK, 0);
-    for(int x=53; x<=78; x++) Terminal_SetCell(x, 12, B_H, C_WHITE, C_BLACK, 0);
-    Terminal_SetCell(79, 12, B_VL, C_WHITE, C_BLACK, 0);
+    Terminal_SetCell(52, 12, B_VR, C_DGRAY, C_BLACK, 0);
+    for(int x=53; x<=78; x++) Terminal_SetCell(x, 12, B_H, C_DGRAY, C_BLACK, 0);
+    Terminal_SetCell(79, 12, B_VL, C_DGRAY, C_BLACK, 0);
     
     DrawTextColor(53, 13, "       ENEMY STATUS       ", C_WHITE, C_BLACK, 0);
 
-    Terminal_SetCell(52, 19, B_HU, C_WHITE, C_BLACK, 0);
-    for(int x=53; x<=78; x++) Terminal_SetCell(x, 19, B_H, C_WHITE, C_BLACK, 0);
-    Terminal_SetCell(79, 19, B_BR, C_WHITE, C_BLACK, 0); 
+    Terminal_SetCell(52, 19, B_HU, C_DGRAY, C_BLACK, 0);
+    for(int x=53; x<=78; x++) Terminal_SetCell(x, 19, B_H, C_DGRAY, C_BLACK, 0);
+    Terminal_SetCell(79, 19, B_BR, C_DGRAY, C_BLACK, 0); 
     
     // Nav Separator 
-    Terminal_SetCell(0, 12, B_VR, C_WHITE, C_BLACK, 0);
-    for(int x=1; x<=14; x++) Terminal_SetCell(x, 12, B_H, C_WHITE, C_BLACK, 0);
-    Terminal_SetCell(15, 12, B_VL, C_WHITE, C_BLACK, 0);
+    Terminal_SetCell(0, 12, B_VR, C_DGRAY, C_BLACK, 0);
+    for(int x=1; x<=14; x++) Terminal_SetCell(x, 12, B_H, C_DGRAY, C_BLACK, 0);
+    Terminal_SetCell(15, 12, B_VL, C_DGRAY, C_BLACK, 0);
     DrawTextColor(1, 13, " DAMAGE REPT  ", C_WHITE, C_BLACK, 0);
     
     // Command Prompt Area
@@ -200,27 +212,40 @@ void Dashboard_DrawScan(ScanMode mode, const Enterprise* ent) {
         
         int sX = 27;
         // Header
-        DrawTextColor(sX+2, 3, "00  01  02", C_WHITE, C_BLACK, 0);
+        char colHeader[40] = "";
+        for (int x = 0; x < 3; x++) {
+            int checkQx = ent->quadX - 1 + x;
+            if (checkQx >= 0 && checkQx < 12) {
+                char buf[5]; snprintf(buf, sizeof(buf), "%02d  ", checkQx);
+                strcat(colHeader, buf);
+            } else {
+                strcat(colHeader, "    ");
+            }
+        }
+        DrawTextColor(sX+2, 3, colHeader, C_WHITE, C_BLACK, 0);
         
         // LRS Grid Top
         int sY = 4;
-        Terminal_SetCell(sX, sY, B_TL, C_WHITE, C_BLACK, 0);
+        Terminal_SetCell(sX, sY, B_TL, C_DGRAY, C_BLACK, 0);
         for(int x=0; x<3;x++){
-            Terminal_SetCell(sX+1 + x*4, sY, B_H, C_WHITE, C_BLACK, 0);
-            Terminal_SetCell(sX+2 + x*4, sY, B_H, C_WHITE, C_BLACK, 0);
-            Terminal_SetCell(sX+3 + x*4, sY, B_H, C_WHITE, C_BLACK, 0);
-            if (x < 2) Terminal_SetCell(sX+4 + x*4, sY, B_HD, C_WHITE, C_BLACK, 0);
+            Terminal_SetCell(sX+1 + x*4, sY, B_H, C_DGRAY, C_BLACK, 0);
+            Terminal_SetCell(sX+2 + x*4, sY, B_H, C_DGRAY, C_BLACK, 0);
+            Terminal_SetCell(sX+3 + x*4, sY, B_H, C_DGRAY, C_BLACK, 0);
+            if (x < 2) Terminal_SetCell(sX+4 + x*4, sY, B_HD, C_DGRAY, C_BLACK, 0);
         }
-        Terminal_SetCell(sX+12, sY, B_TR, C_WHITE, C_BLACK, 0);
+        Terminal_SetCell(sX+12, sY, B_TR, C_DGRAY, C_BLACK, 0);
         
         // 3x3 Grid
         for (int y = 0; y < 3; y++) {
-            char rBuf[5];
-            snprintf(rBuf, sizeof(rBuf), "%02d", y);
-            DrawTextColor(sX-3, sY+1 + y*2, rBuf, C_WHITE, C_BLACK, 0);
+            int checkQy = ent->quadY - 1 + y;
+            if (checkQy >= 0 && checkQy < 12) {
+                char rBuf[5];
+                snprintf(rBuf, sizeof(rBuf), "%02d", checkQy);
+                DrawTextColor(sX-3, sY+1 + y*2, rBuf, C_WHITE, C_BLACK, 0);
+            }
             
             for (int x = 0; x < 3; x++) {
-                Terminal_SetCell(sX + x*4, sY+1 + y*2, B_V, C_WHITE, C_BLACK, 0);
+                Terminal_SetCell(sX + x*4, sY+1 + y*2, B_V, C_DGRAY, C_BLACK, 0);
                 
                 // Get Galaxy Data Relative to Enterprise
                 int checkQx = ent->quadX - 1 + x;
@@ -232,108 +257,154 @@ void Dashboard_DrawScan(ScanMode mode, const Enterprise* ent) {
                     snprintf(data, sizeof(data), "%d%d%d", q->num_enemies, q->has_base ? 1 : 0, q->num_stars);
                     DrawTextColor(sX+1 + x*4, sY+1 + y*2, data, C_GREEN, C_BLACK, 0);
                 } else {
-                    DrawTextColor(sX+1 + x*4, sY+1 + y*2, "***", C_DGRAY, C_BLACK, 0); // Out of bounds
+                    // Out of bounds: completely empty string, no numbers.
+                    DrawTextColor(sX+1 + x*4, sY+1 + y*2, "   ", C_DGRAY, C_BLACK, 0);
                 }
             }
-            Terminal_SetCell(sX+12, sY+1 + y*2, B_V, C_WHITE, C_BLACK, 0);
+            Terminal_SetCell(sX+12, sY+1 + y*2, B_V, C_DGRAY, C_BLACK, 0);
             
             // Mid Row
             if (y < 2) {
-                Terminal_SetCell(sX, sY+2 + y*2, B_VR, C_WHITE, C_BLACK, 0);
+                Terminal_SetCell(sX, sY+2 + y*2, B_VR, C_DGRAY, C_BLACK, 0);
                 for(int x=0; x<3;x++){
-                    Terminal_SetCell(sX+1 + x*4, sY+2 + y*2, B_H, C_WHITE, C_BLACK, 0);
-                    Terminal_SetCell(sX+2 + x*4, sY+2 + y*2, B_H, C_WHITE, C_BLACK, 0);
-                    Terminal_SetCell(sX+3 + x*4, sY+2 + y*2, B_H, C_WHITE, C_BLACK, 0);
-                    if (x < 2) Terminal_SetCell(sX+4 + x*4, sY+2 + y*2, B_X, C_WHITE, C_BLACK, 0);
+                    Terminal_SetCell(sX+1 + x*4, sY+2 + y*2, B_H, C_DGRAY, C_BLACK, 0);
+                    Terminal_SetCell(sX+2 + x*4, sY+2 + y*2, B_H, C_DGRAY, C_BLACK, 0);
+                    Terminal_SetCell(sX+3 + x*4, sY+2 + y*2, B_H, C_DGRAY, C_BLACK, 0);
+                    if (x < 2) Terminal_SetCell(sX+4 + x*4, sY+2 + y*2, B_X, C_DGRAY, C_BLACK, 0);
                 }
-                Terminal_SetCell(sX+12, sY+2 + y*2, B_VL, C_WHITE, C_BLACK, 0);
+                Terminal_SetCell(sX+12, sY+2 + y*2, B_VL, C_DGRAY, C_BLACK, 0);
             }
         }
         
         // Bottom Row
         int bY = sY + 6;
-        Terminal_SetCell(sX, bY, B_BL, C_WHITE, C_BLACK, 0);
+        Terminal_SetCell(sX, bY, B_BL, C_DGRAY, C_BLACK, 0);
         for(int x=0; x<3;x++){
-            Terminal_SetCell(sX+1 + x*4, bY, B_H, C_WHITE, C_BLACK, 0);
-            Terminal_SetCell(sX+2 + x*4, bY, B_H, C_WHITE, C_BLACK, 0);
-            Terminal_SetCell(sX+3 + x*4, bY, B_H, C_WHITE, C_BLACK, 0);
-            if (x < 2) Terminal_SetCell(sX+4 + x*4, bY, B_HU, C_WHITE, C_BLACK, 0);
+            Terminal_SetCell(sX+1 + x*4, bY, B_H, C_DGRAY, C_BLACK, 0);
+            Terminal_SetCell(sX+2 + x*4, bY, B_H, C_DGRAY, C_BLACK, 0);
+            Terminal_SetCell(sX+3 + x*4, bY, B_H, C_DGRAY, C_BLACK, 0);
+            if (x < 2) Terminal_SetCell(sX+4 + x*4, bY, B_HU, C_DGRAY, C_BLACK, 0);
         }
-        Terminal_SetCell(sX+12, bY, B_BR, C_WHITE, C_BLACK, 0);
+        Terminal_SetCell(sX+12, bY, B_BR, C_DGRAY, C_BLACK, 0);
         
     } else {
         // SRS Mode
         int sX = 19;
         int sY = 2;
         
-        DrawTextColor(sX+2, 1, "00  01  02  03  04  05  06  07", C_WHITE, C_BLACK, 0);
+        static int camX = -1;
+        static int camY = -1;
+        int entGX = ent->sectX;
+        int entGY = ent->sectY;
         
-        // Top
+        if (camX == -1 || entGX < camX || entGX >= camX + 8 || entGY < camY || entGY >= camY + 8) {
+            camX = entGX - 3;
+            camY = entGY - 3;
+            if (camX < 0) camX = 0;
+            if (camY < 0) camY = 0;
+            if (camX > 96 - 8) camX = 96 - 8;
+            if (camY > 96 - 8) camY = 96 - 8;
+        }
+
+        // Draw col header based on camX
+        char colHeader[40] = "";
+        for(int x=0; x<8; x++) {
+            char buf[5]; snprintf(buf, sizeof(buf), " %02d ", camX+x);
+            strcat(colHeader, buf);
+        }
+        DrawTextColor(sX+1, 1, colHeader, C_WHITE, C_BLACK, 0);
+
         Terminal_SetCell(sX, sY, B_TL, C_DGRAY, C_BLACK, 0);
-        for(int x=0; x<8;x++){
-            Terminal_SetCell(sX+1 + x*4, sY, B_H, C_DGRAY, C_BLACK, 0);
-            Terminal_SetCell(sX+2 + x*4, sY, B_H, C_DGRAY, C_BLACK, 0);
-            Terminal_SetCell(sX+3 + x*4, sY, B_H, C_DGRAY, C_BLACK, 0);
-            if (x < 7) Terminal_SetCell(sX+4 + x*4, sY, B_HD, C_DGRAY, C_BLACK, 0);
+        for(int i=0; i<8; i++) {
+            Terminal_SetCell(sX+1 + i*4, sY, B_H, C_DGRAY, C_BLACK, 0);
+            Terminal_SetCell(sX+2 + i*4, sY, B_H, C_DGRAY, C_BLACK, 0);
+            Terminal_SetCell(sX+3 + i*4, sY, B_H, C_DGRAY, C_BLACK, 0);
+            if (i < 7) {
+                int hd = ((camX + i) % 8 == 7) ? B_HD_DBL : B_HD;
+                Terminal_SetCell(sX+4 + i*4, sY, hd, C_DGRAY, C_BLACK, 0);
+            }
         }
         Terminal_SetCell(sX+32, sY, B_TR, C_DGRAY, C_BLACK, 0);
         
-        // Quadrant
-        Quadrant* q = Galaxy_GetQuadrant(ent->quadX, ent->quadY);
-        
         for (int y = 0; y < 8; y++) {
             char rBuf[5];
-            snprintf(rBuf, sizeof(rBuf), "%02d", y);
-            DrawTextColor(sX-3, sY+1 + y*2, rBuf, C_WHITE, C_BLACK, 0);
+            snprintf(rBuf, sizeof(rBuf), "%02d", camY+y);
+            DrawTextColor(sX-2, sY+1 + y*2, rBuf, C_WHITE, C_BLACK, 0);
             
             for (int x = 0; x < 8; x++) {
-                Terminal_SetCell(sX + x*4, sY+1 + y*2, B_V, C_DGRAY, C_BLACK, 0);
+                int v_line = (x > 0 && (camX + x) % 8 == 0) ? B_V_DBL : B_V;
+                Terminal_SetCell(sX + x*4, sY+1 + y*2, v_line, C_DGRAY, C_BLACK, 0);
                 
-                // Draw Entity
+                int gx = camX + x;
+                int gy = camY + y;
+                int qx = gx / 8;
+                int qy = gy / 8;
+                int sx = gx % 8;
+                int sy = gy % 8;
+                
                 int charStart = sX + 1 + x*4;
-                if (x == ent->sectX && y == ent->sectY) {
+                
+                if (gx == entGX && gy == entGY) {
                     DrawTextColor(charStart, sY+1 + y*2, "<E>", C_CYAN, C_BLACK, 0);
-                } else if (q != NULL) {
-                    Sector* s = &q->sectors[y][x];
-                    if (s->entity_type == ENTITY_STAR) {
-                        DrawTextColor(charStart, sY+1 + y*2, " * ", C_YELLOW, C_BLACK, 0);
-                    } else if (s->entity_type == ENTITY_BASE) {
-                        DrawTextColor(charStart, sY+1 + y*2, ">!<", C_CYAN, C_BLACK, 0);
-                    } else if (s->entity_type == ENTITY_ENEMY) {
-                        KlingonGroup* e = Galaxy_GetEnemy(s->entity_id);
-                        if (e->class_id == 0) DrawTextColor(charStart, sY+1 + y*2, "+++", C_RED, C_BLACK, 0); // B'rel
-                        else if (e->class_id == 1) DrawTextColor(charStart, sY+1 + y*2, "+K+", C_RED, C_BLACK, 0); // K'Tinga
-                        else DrawTextColor(charStart, sY+1 + y*2, "+V+", C_RED, C_BLACK, 0); // Vor'Cha
+                } else {
+                    Quadrant* q = Galaxy_GetQuadrant(qx, qy);
+                    if (q) {
+                        Sector* s = &q->sectors[sy][sx];
+                        if (s->entity_type == ENTITY_STAR) {
+                            DrawTextColor(charStart, sY+1 + y*2, " * ", C_YELLOW, C_BLACK, 0);
+                        } else if (s->entity_type == ENTITY_BASE) {
+                            DrawTextColor(charStart, sY+1 + y*2, ">!<", C_CYAN, C_BLACK, 0);
+                        } else if (s->entity_type == ENTITY_ENEMY) {
+                            KlingonGroup* e = Galaxy_GetEnemy(s->entity_id);
+                            if (e && e->active) {
+                                if (e->class_id == 0) DrawTextColor(charStart, sY+1 + y*2, "+++", C_RED, C_BLACK, 0);
+                                else if (e->class_id == 1) DrawTextColor(charStart, sY+1 + y*2, "+K+", C_RED, C_BLACK, 0);
+                                else DrawTextColor(charStart, sY+1 + y*2, "+V+", C_RED, C_BLACK, 0);
+                            } else {
+                                DrawTextColor(charStart, sY+1 + y*2, "   ", C_WHITE, C_BLACK, 0);
+                            }
+                        } else {
+                            DrawTextColor(charStart, sY+1 + y*2, "   ", C_WHITE, C_BLACK, 0);
+                        }
                     } else {
-                        DrawTextColor(charStart, sY+1 + y*2, "   ", C_WHITE, C_BLACK, 0); // Empty
+                        DrawTextColor(charStart, sY+1 + y*2, "   ", C_WHITE, C_BLACK, 0);
                     }
                 }
             }
             Terminal_SetCell(sX+32, sY+1 + y*2, B_V, C_DGRAY, C_BLACK, 0);
             
-            // Mid Row
             if (y < 7) {
-                Terminal_SetCell(sX, sY+2 + y*2, B_VR, C_DGRAY, C_BLACK, 0);
-                for(int x=0; x<8;x++){
-                    Terminal_SetCell(sX+1 + x*4, sY+2 + y*2, B_H, C_DGRAY, C_BLACK, 0);
-                    Terminal_SetCell(sX+2 + x*4, sY+2 + y*2, B_H, C_DGRAY, C_BLACK, 0);
-                    Terminal_SetCell(sX+3 + x*4, sY+2 + y*2, B_H, C_DGRAY, C_BLACK, 0);
-                    if (x < 7) Terminal_SetCell(sX+4 + x*4, sY+2 + y*2, B_X, C_DGRAY, C_BLACK, 0);
+                int h_dbl = ((camY + y) % 8 == 7);
+                Terminal_SetCell(sX, sY+2 + y*2, h_dbl ? B_VR_DBL : B_VR, C_DGRAY, C_BLACK, 0);
+                for(int i=0; i<8; i++){
+                    int h_char = h_dbl ? B_H_DBL : B_H;
+                    Terminal_SetCell(sX+1 + i*4, sY+2 + y*2, h_char, C_DGRAY, C_BLACK, 0);
+                    Terminal_SetCell(sX+2 + i*4, sY+2 + y*2, h_char, C_DGRAY, C_BLACK, 0);
+                    Terminal_SetCell(sX+3 + i*4, sY+2 + y*2, h_char, C_DGRAY, C_BLACK, 0);
+                    if (i < 7) {
+                        int v_dbl = ((camX + i) % 8 == 7);
+                        int cross = B_X;
+                        if (h_dbl && v_dbl) cross = B_X_DBL;
+                        else if (h_dbl) cross = B_X_HD_VS;
+                        else if (v_dbl) cross = B_X_VD_HS;
+                        Terminal_SetCell(sX+4 + i*4, sY+2 + y*2, cross, C_DGRAY, C_BLACK, 0);
+                    }
                 }
-                Terminal_SetCell(sX+32, sY+2 + y*2, B_VL, C_DGRAY, C_BLACK, 0);
+                Terminal_SetCell(sX+32, sY+2 + y*2, h_dbl ? B_VL_DBL : B_VL, C_DGRAY, C_BLACK, 0);
             }
         }
         
-        // Bottom Row completely standalone for SRS
-        Terminal_SetCell(sX, sY+16, B_BL, C_DGRAY, C_BLACK, 0);
-        for(int x=0; x<8;x++){
-            Terminal_SetCell(sX+1 + x*4, sY+16, B_H, C_DGRAY, C_BLACK, 0);
-            Terminal_SetCell(sX+2 + x*4, sY+16, B_H, C_DGRAY, C_BLACK, 0);
-            Terminal_SetCell(sX+3 + x*4, sY+16, B_H, C_DGRAY, C_BLACK, 0);
-            if (x < 7) {
-                Terminal_SetCell(sX+4 + x*4, sY+16, B_HU, C_DGRAY, C_BLACK, 0);
+        int bY = sY + 16;  // y takes 2 lines, so 8*2 = 16
+        Terminal_SetCell(sX, bY, B_BL, C_DGRAY, C_BLACK, 0);
+        for(int i=0; i<8; i++){
+            Terminal_SetCell(sX+1 + i*4, bY, B_H, C_DGRAY, C_BLACK, 0);
+            Terminal_SetCell(sX+2 + i*4, bY, B_H, C_DGRAY, C_BLACK, 0);
+            Terminal_SetCell(sX+3 + i*4, bY, B_H, C_DGRAY, C_BLACK, 0);
+            if (i < 7) {
+                int hu = ((camX + i) % 8 == 7) ? B_HU_DBL : B_HU;
+                Terminal_SetCell(sX+4 + i*4, bY, hu, C_DGRAY, C_BLACK, 0);
             }
         }
-        Terminal_SetCell(sX+32, sY+16, B_BR, C_DGRAY, C_BLACK, 0);
+        Terminal_SetCell(sX+32, bY, B_BR, C_DGRAY, C_BLACK, 0);
     }
 }

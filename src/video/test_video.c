@@ -9,29 +9,11 @@
 // Vamos escalar em 2x pra ver melhor, então janela 1280x720, virtual 80x25.
 #define SCALE 2
 
+Enterprise ent;
 void DrawMockupDashboard(ScanMode mode) {
-    Enterprise ent;
-    memset(&ent, 0, sizeof(Enterprise));
-    ent.stardate = 3421.5;
-    ent.quadX = 6;
-    ent.quadY = 6;
-    ent.sectX = 4;
-    ent.sectY = 2;
     
-    ent.energyMax = 5000;
-    ent.energy = 3500;
-    ent.shieldsMax = 100; // Porcentagem
-    ent.shields = 21;
-    ent.torpedoesMax = 10;
-    ent.torpedoes = 10;
     
-    strcpy(ent.condition, "RED");
     
-    ent.sysWarp = 1.0f;
-    ent.sysPhaser = 1.0f;
-    ent.sysSensor = 1.0f;
-    ent.sysLRS = 1.0f;
-    ent.sysComputer = 1.0f;
 
     Dashboard_DrawTemplate();
     Dashboard_DrawEnterpriseStats(&ent);
@@ -95,23 +77,45 @@ int main(void) {
         return 1;
     }
 
-    int cursorX = 40;
-    int cursorY = 12;
 
     int currentCols = 80;
     int currentRows = 25;
 
     // Gerar uma galáxia de teste!
     Galaxy_Generate(1701);
+    
+    memset(&ent, 0, sizeof(Enterprise));
+    ent.stardate = 3421.5;
+    ent.quadX = 6;
+    ent.quadY = 6;
+    ent.sectX = 6 * 8 + 4;
+    ent.sectY = 6 * 8 + 2;
+    ent.energyMax = 5000;
+    ent.energy = 3500;
+    ent.shieldsMax = 100;
+    ent.shields = 21;
+    ent.torpedoesMax = 10;
+    ent.torpedoes = 10;
+    strcpy(ent.condition, "RED");
+    ent.sysWarp = 1.0f;
+    ent.sysPhaser = 1.0f;
+    ent.sysSensor = 1.0f;
+    ent.sysLRS = 1.0f;
+    ent.sysComputer = 1.0f;
+
 
     while (!WindowShouldClose()) {
 
-        // Tratamento do Controle do Cursor
-        if (IsKeyPressed(KEY_RIGHT) && cursorX < currentCols - 1) cursorX++;
-        if (IsKeyPressed(KEY_LEFT) && cursorX > 0) cursorX--;
-        if (IsKeyPressed(KEY_DOWN) && cursorY < currentRows - 1) cursorY++;
-        if (IsKeyPressed(KEY_UP) && cursorY > 0) cursorY--;
-
+        // Movement logic global (0-95)
+        if (IsKeyPressed(KEY_RIGHT) && ent.sectX < 95) ent.sectX++;
+        if (IsKeyPressed(KEY_LEFT) && ent.sectX > 0) ent.sectX--;
+        if (IsKeyPressed(KEY_DOWN) && ent.sectY < 95) ent.sectY++;
+        if (IsKeyPressed(KEY_UP) && ent.sectY > 0) ent.sectY--;
+        
+        ent.quadX = ent.sectX / 8;
+        ent.quadY = ent.sectY / 8;
+        
+        // Removed cursorX/Y logic temporarily
         // Hotkeys de Resolução
         if (IsKeyPressed(KEY_ONE)) {
             currentCols = 80; currentRows = 25;
@@ -130,8 +134,7 @@ int main(void) {
         Terminal_Clear(0);
         DrawMockupDashboard(currentMockupMode);
         
-        VRAMCell cell = Terminal_GetCell(cursorX, cursorY);
-        Terminal_SetCell(cursorX, cursorY, '_', cell.bg, cell.fg, ATTR_BLINK | ATTR_BOLD);
+
         
         Terminal_SwapBuffers();
 

@@ -200,17 +200,42 @@ void Terminal_Render(void) {
                     if (cell.glyph == 0x2588) { // BLOCK_FULL
                         DrawRectangle(px, py, cw, ch, fColor);
                     } else {
-                        // Horizontal spans
-                        bool left  = (cell.glyph == 0x2500 || cell.glyph == 0x2510 || cell.glyph == 0x2518 || cell.glyph == 0x2524 || cell.glyph == 0x252C || cell.glyph == 0x2534 || cell.glyph == 0x253C);
-                        bool right = (cell.glyph == 0x2500 || cell.glyph == 0x250C || cell.glyph == 0x2514 || cell.glyph == 0x251C || cell.glyph == 0x252C || cell.glyph == 0x2534 || cell.glyph == 0x253C);
-                        // Vertical spans
-                        bool up    = (cell.glyph == 0x2502 || cell.glyph == 0x2514 || cell.glyph == 0x2518 || cell.glyph == 0x251C || cell.glyph == 0x2524 || cell.glyph == 0x2534 || cell.glyph == 0x253C);
-                        bool down  = (cell.glyph == 0x2502 || cell.glyph == 0x250C || cell.glyph == 0x2510 || cell.glyph == 0x251C || cell.glyph == 0x2524 || cell.glyph == 0x252C || cell.glyph == 0x253C);
+                        // Horizontal spans (Single)
+                        bool left  = (cell.glyph == 0x2500 || cell.glyph == 0x2510 || cell.glyph == 0x2518 || cell.glyph == 0x2524 || cell.glyph == 0x252C || cell.glyph == 0x2534 || cell.glyph == 0x253C || cell.glyph == 0x256B);
+                        bool right = (cell.glyph == 0x2500 || cell.glyph == 0x250C || cell.glyph == 0x2514 || cell.glyph == 0x251C || cell.glyph == 0x252C || cell.glyph == 0x2534 || cell.glyph == 0x253C || cell.glyph == 0x256B);
+                        
+                        // Vertical spans (Single)
+                        bool up    = (cell.glyph == 0x2502 || cell.glyph == 0x2514 || cell.glyph == 0x2518 || cell.glyph == 0x251C || cell.glyph == 0x2524 || cell.glyph == 0x2534 || cell.glyph == 0x253C || cell.glyph == 0x256A);
+                        bool down  = (cell.glyph == 0x2502 || cell.glyph == 0x250C || cell.glyph == 0x2510 || cell.glyph == 0x251C || cell.glyph == 0x2524 || cell.glyph == 0x252C || cell.glyph == 0x253C || cell.glyph == 0x256A);
 
+                        // Horizontal spans (Double)
+                        bool left_D  = (cell.glyph == 0x2550 || cell.glyph == 0x256C || cell.glyph == 0x2566 || cell.glyph == 0x2569 || cell.glyph == 0x2563 || cell.glyph == 0x256A);
+                        bool right_D = (cell.glyph == 0x2550 || cell.glyph == 0x256C || cell.glyph == 0x2566 || cell.glyph == 0x2569 || cell.glyph == 0x2560 || cell.glyph == 0x256A);
+                        
+                        // Vertical spans (Double)
+                        bool up_D    = (cell.glyph == 0x2551 || cell.glyph == 0x256C || cell.glyph == 0x2569 || cell.glyph == 0x2560 || cell.glyph == 0x2563 || cell.glyph == 0x256B);
+                        bool down_D  = (cell.glyph == 0x2551 || cell.glyph == 0x256C || cell.glyph == 0x2566 || cell.glyph == 0x2560 || cell.glyph == 0x2563 || cell.glyph == 0x256B);
+
+                        // Draw Single Lines
                         if (left)  DrawRectangle(px, cy - 1, cw_half, lw, fColor);
                         if (right) DrawRectangle(px + cw_half, cy - 1, cw - cw_half, lw, fColor);
                         if (up)    DrawRectangle(cx - 1, py, lw, ch_half, fColor);
                         if (down)  DrawRectangle(cx - 1, py + ch_half, lw, ch - ch_half, fColor);
+
+                        // Draw Double Lines
+                        // Top horizontal line
+                        if (left_D)  DrawRectangle(px, cy - 3, cw_half + 1, lw, fColor);
+                        if (right_D) DrawRectangle(px + cw_half - 1, cy - 3, cw - cw_half + 1, lw, fColor);
+                        // Bottom horizontal line
+                        if (left_D)  DrawRectangle(px, cy + 1, cw_half + 1, lw, fColor);
+                        if (right_D) DrawRectangle(px + cw_half - 1, cy + 1, cw - cw_half + 1, lw, fColor);
+                        
+                        // Left vertical line
+                        if (up_D)    DrawRectangle(cx - 3, py, lw, ch_half + 1, fColor);
+                        if (down_D)  DrawRectangle(cx - 3, py + ch_half - 1, lw, ch - ch_half + 1, fColor);
+                        // Right vertical line
+                        if (up_D)    DrawRectangle(cx + 1, py, lw, ch_half + 1, fColor);
+                        if (down_D)  DrawRectangle(cx + 1, py + ch_half - 1, lw, ch - ch_half + 1, fColor);
                     }
                     continue; // Skip font renderer for these
                 }
