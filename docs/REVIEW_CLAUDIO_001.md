@@ -174,16 +174,16 @@ Se `VRAM_Front` alocar com sucesso mas `VRAM_Back` falhar, `VRAM_Front` vaza. A 
 
 ## 5. Recomendações Priorizadas para o Castor
 
-1. **[URGENTE]** Corrigir leak no `Terminal_Init` e proteção de divisão por zero nas strings de stats. São one-liners.
-2. **[URGENTE]** Adicionar guard de tentativas no loop de colocação de entidades em `Galaxy_Generate`.
-3. **[IMPORTANTE]** Extrair `Dashboard_DrawLRS`/`Dashboard_DrawSRS` como funções separadas.
-4. **[IMPORTANTE]** Converter `condition` para enum. Criar `Enterprise_Init()`.
-5. **[PLANEJÁVEL]** Substituir magic numbers do layout por constantes nomeadas.
-6. **[PLANEJÁVEL]** Lookup table para o renderizador de Box-Drawing.
-7. **[PLANEJÁVEL]** Sincronizar `MANUAL.md` com o código real (TEXTURE_FILTER).
-8. **[BACKLOG]** Migrar estado global para structs passáveis por ponteiro.
-9. **[BACKLOG]** Implementar ou remover `Dashboard_DrawLogs` do header.
-10. **[BACKLOG]** Considerar testes unitários de snapshot para geração procedural.
+1. [x] **[URGENTE]** Corrigir leak no `Terminal_Init` e proteção de divisão por zero nas strings de stats. São one-liners.
+2. [x] **[URGENTE]** Adicionar guard de tentativas no loop de colocação de entidades em `Galaxy_Generate`.
+3. [x] **[IMPORTANTE]** Extrair `Dashboard_DrawLRS`/`Dashboard_DrawSRS` como funções separadas.
+4. [x] **[IMPORTANTE]** Converter `condition` para enum. Criar `Enterprise_Init()`.
+5. [x] **[PLANEJÁVEL]** Substituir magic numbers do layout por constantes nomeadas.
+6. [x] **[PLANEJÁVEL]** Lookup table para o renderizador de Box-Drawing.
+7. [x] **[PLANEJÁVEL]** Sincronizar `MANUAL.md` com o código real (TEXTURE_FILTER).
+8. [x] **[BACKLOG]** Migrar estado global para structs passáveis por ponteiro.
+9. [x] **[BACKLOG]** Implementar ou remover `Dashboard_DrawLogs` do header.
+10. [ ] **[BACKLOG]** Considerar testes unitários de snapshot para geração procedural.
 
 ---
 
