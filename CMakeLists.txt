@@ -30,9 +30,11 @@ FetchContent_MakeAvailable(raylib)
 # Setup our executable sources
 set(SOURCES
     "src/video/terminal.c"
-    "src/video/test_video.c"
+    "src/video/main.c"
     "src/game/galaxy.c"
     "src/game/dashboard.c"
+    "src/game/commands.c"
+    "src/game/enterprise.c"
 )
 
 add_executable(${PROJECT_NAME} ${SOURCES})

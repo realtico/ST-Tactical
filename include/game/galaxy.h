@@ -66,14 +66,28 @@ typedef struct {
 // Em purismo de C, o header só expõe (extern) se necessário. Mas pela nota do Arquiteto, "Crie um pool estático KlingonGroup enemies[MAX_ENEMIES]".
 // Faremos isso no source e daremos acesso via funções se preciso.
 
+// Estado completo da Galáxia instanciável
+typedef struct {
+    uint32_t seed_state;
+    uint16_t enemies_count;
+
+    // Memória de Sensores
+    double last_scan_date[12][12];
+    uint8_t last_known_klingons[12][12];
+
+    KlingonGroup enemy_pool[MAX_ENEMIES];
+    Quadrant galaxy_map[QUADRANT_GRID_SIZE][QUADRANT_GRID_SIZE];
+} GalaxyState;
+
 /* Inicializa a Galáxia a partir de uma seed */
-void Galaxy_Generate(uint32_t seed);
+void Galaxy_Generate(GalaxyState* state, uint32_t seed);
 
 /* Recupera acesso de leitura para a Galáxia e o Pool de inimigos para renderização, etc */
-Quadrant* Galaxy_GetQuadrant(int qx, int qy);
-KlingonGroup* Galaxy_GetEnemy(uint16_t id);
+Quadrant* Galaxy_GetQuadrant(GalaxyState* state, int qx, int qy);
+KlingonGroup* Galaxy_GetEnemy(GalaxyState* state, uint16_t id);
 
-/* Salva um log ASCII em galaxy_debug.txt */
-void Galaxy_DumpToLog(void);
+/* Salva um log ASCII em arquivo */
+void Galaxy_DumpToLog(GalaxyState* state, const char* filepath);
+void Galaxy_UpdateSensors(GalaxyState* state, int qX, int qY, double stardate, bool isLRS);
 
 #endif // GALAXY_H

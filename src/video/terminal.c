@@ -31,7 +31,11 @@ bool Terminal_Init(int cols, int rows, const char *fontPath, int fontSize) {
     term.VRAM_Front = (VRAMCell *)malloc(cols * rows * sizeof(VRAMCell));
     term.VRAM_Back = (VRAMCell *)malloc(cols * rows * sizeof(VRAMCell));
     
-    if (!term.VRAM_Front || !term.VRAM_Back) return false;
+    if (!term.VRAM_Front || !term.VRAM_Back) {
+        if (term.VRAM_Front) { free(term.VRAM_Front); term.VRAM_Front = NULL; }
+        if (term.VRAM_Back) { free(term.VRAM_Back); term.VRAM_Back = NULL; }
+        return false;
+    }
 
     memset(term.VRAM_Front, 0, cols * rows * sizeof(VRAMCell));
     memset(term.VRAM_Back, 0, cols * rows * sizeof(VRAMCell));
@@ -40,7 +44,8 @@ bool Terminal_Init(int cols, int rows, const char *fontPath, int fontSize) {
     int codepoints[512];
     int count = 0;
     for (int i = 32; i < 127; i++) codepoints[count++] = i;
-    for (int i = 0; i < 256; i++) codepoints[count++] = 0x2500 + i; // Inclui Box e Block inteiro
+    for (int i = 0; i < 256; i++) codepoints[count++] = 0x2500 + i;
+    codepoints[count++] = 0x00B7; // Middle Dot // Inclui Box e Block inteiro
     
     // Carregar fonte monoespaçada com nosso mapa
     term.font = LoadFontEx(fontPath, fontSize, codepoints, count);

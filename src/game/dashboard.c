@@ -2,6 +2,7 @@
 #include "video/terminal.h"
 #include <stdio.h>
 #include <string.h>
+#include <stdarg.h>
 
 // Cores (padrão terminal de 1 a 15, em tese, a paleta é customizável, mas usaremos 
 // 15 = braco, 0 = preto, 10 = verde, 12 = vermelho, 14 = amarelo, 8 = cinza escuro)
@@ -13,6 +14,22 @@
 #define C_DGRAY  8
 
 #define C_CYAN   14   // 14 é Bright Cyan
+
+// UI Anchors
+#define NAV_PANEL_X 1
+#define NAV_PANEL_Y 1
+#define CENTER_PANEL_X 18
+#define CENTER_PANEL_Y 1
+#define CENTER_PANEL_W 33
+#define CENTER_PANEL_H 18
+#define NAV_PANEL_W 24
+#define NAV_PANEL_H 18
+#define LOG_PANEL_X 1
+#define LOG_PANEL_Y 20
+#define LOG_PANEL_W 59
+#define LOG_PANEL_H 4
+#define RES_PANEL_X 61
+#define RES_PANEL_Y 1
 
 #define B_V_DBL  0x2551
 #define B_H_DBL  0x2550
@@ -40,29 +57,21 @@
 #define B_X   0x253C 
 #define BLOCK_FULL 0x2588 
 #define BLOCK_LITE 0x2591
+#define MIDDLE_DOT 0x00B7
 
 // Função auxiliar para desenhar box
-static void DrawBox(int x, int y, int w, int h, uint8_t fg, uint8_t bg) {
-    Terminal_SetCell(x, y, B_TL, fg, bg, 0);
-    Terminal_SetCell(x + w - 1, y, B_TR, fg, bg, 0);
-    Terminal_SetCell(x, y + h - 1, B_BL, fg, bg, 0);
-    Terminal_SetCell(x + w - 1, y + h - 1, B_BR, fg, bg, 0);
-    
-    for (int i = 1; i < w - 1; i++) {
-        Terminal_SetCell(x + i, y, B_H, fg, bg, 0);
-        Terminal_SetCell(x + i, y + h - 1, B_H, fg, bg, 0);
-    }
-    for (int i = 1; i < h - 1; i++) {
-        Terminal_SetCell(x, y + i, B_V, fg, bg, 0);
-        Terminal_SetCell(x + w - 1, y + i, B_V, fg, bg, 0);
-    }
-}
 
 // Auxiliar para texto
 static void DrawTextColor(int x, int y, const char* text, uint8_t fg, uint8_t bg, uint8_t attr) {
     for (int i = 0; text[i] != '\0'; i++) {
-        Terminal_SetCell(x + i, y, text[i], fg, bg, attr);
+        Terminal_SetCell(x + i, y, (unsigned char)text[i], fg, bg, attr);
     }
+}
+
+// Desenha 3 middle dots (U+00B7) — usado para quadrantes não-escaneados no mapa
+static void DrawMiddleDots(int x, int y, uint8_t fg, uint8_t bg) {
+    for (int i = 0; i < 3; i++)
+        Terminal_SetCell(x + i, y, MIDDLE_DOT, fg, bg, 0);
 }
 
 // Barras de Progresso
@@ -83,7 +92,7 @@ void Dashboard_Init(void) {
     // Para futura iniciação caso precise carregar paletas ou texturas de UI.
 }
 
-void Dashboard_DrawTemplate(void) {
+void Dashboard_DrawFrame(void) {
     // Colunas do Template do PO:
     // Esq: 0 a 15 (W=16)
     // Centro: 16 a 52 (W=37)
@@ -147,7 +156,7 @@ void Dashboard_DrawTemplate(void) {
     DrawTextColor(1, 13, " DAMAGE REPT  ", C_WHITE, C_BLACK, 0);
     
     // Command Prompt Area
-    DrawTextColor(0, 20, "COMMAND? > _", C_WHITE, C_BLACK, 0);
+    
 }
 
 void Dashboard_DrawEnterpriseStats(const Enterprise* ent) {
@@ -184,10 +193,11 @@ void Dashboard_DrawEnterpriseStats(const Enterprise* ent) {
 
     // Resources Left Panel
     uint8_t condColor = C_GREEN;
-    if (strcmp(ent->condition, "RED") == 0) condColor = C_RED;
-    if (strcmp(ent->condition, "YELLOW") == 0) condColor = C_YELLOW;
+    if (ent->condition == COND_RED) condColor = C_RED;
+    if (ent->condition == COND_YELLOW) condColor = C_YELLOW;
     
-    snprintf(buf, sizeof(buf), "CONDITION: %s", ent->condition);
+    const char* condStr = (ent->condition == COND_RED) ? "RED   " : (ent->condition == COND_YELLOW) ? "YELLOW" : "GREEN ";
+    snprintf(buf, sizeof(buf), "CONDITION: %s", condStr);
     DrawTextColor(54, 3, buf, condColor, C_BLACK, 0);
     
     DrawTextColor(54, 4, "ENERGY:   ", C_WHITE, C_BLACK, 0);
@@ -197,7 +207,7 @@ void Dashboard_DrawEnterpriseStats(const Enterprise* ent) {
 
     DrawTextColor(54, 7, "SHIELDS:  ", C_WHITE, C_BLACK, 0);
     DrawProgressBar(65, 7, ent->shields, ent->shieldsMax, 10, C_CYAN, C_DGRAY, C_BLACK);
-    snprintf(buf, sizeof(buf), "(%d%%)", (int)(((float)ent->shields/(float)ent->shieldsMax)*100));
+    snprintf(buf, sizeof(buf), "(%d%%)", ent->shieldsMax > 0 ? (int)(((float)ent->shields/(float)ent->shieldsMax)*100) : 0);
     DrawTextColor(56, 8, buf, C_WHITE, C_BLACK, 0);
     
     DrawTextColor(54, 10, "TORPEDOES:", C_WHITE, C_BLACK, 0);
@@ -206,11 +216,12 @@ void Dashboard_DrawEnterpriseStats(const Enterprise* ent) {
     DrawTextColor(56, 11, buf, C_WHITE, C_BLACK, 0);
 }
 
-void Dashboard_DrawScan(ScanMode mode, const Enterprise* ent) {
-    if (mode == SCAN_MODE_LRS) {
-        DrawTextColor(16, 1, "       LONG RANGE SCAN  (LRS)       ", C_WHITE, C_BLACK, 0);
+void Dashboard_DrawLRS(GalaxyState* galaxy, const Enterprise* ent) {
+    int sX = 28;
+    int sY = 4;
+    DrawTextColor(16, 1, "       LONG RANGE SCAN  (LRS)       ", C_WHITE, C_BLACK, 0);
         
-        int sX = 27;
+        
         // Header
         char colHeader[40] = "";
         for (int x = 0; x < 3; x++) {
@@ -225,7 +236,7 @@ void Dashboard_DrawScan(ScanMode mode, const Enterprise* ent) {
         DrawTextColor(sX+2, 3, colHeader, C_WHITE, C_BLACK, 0);
         
         // LRS Grid Top
-        int sY = 4;
+        
         Terminal_SetCell(sX, sY, B_TL, C_DGRAY, C_BLACK, 0);
         for(int x=0; x<3;x++){
             Terminal_SetCell(sX+1 + x*4, sY, B_H, C_DGRAY, C_BLACK, 0);
@@ -251,9 +262,9 @@ void Dashboard_DrawScan(ScanMode mode, const Enterprise* ent) {
                 int checkQx = ent->quadX - 1 + x;
                 int checkQy = ent->quadY - 1 + y;
                 
-                Quadrant* q = Galaxy_GetQuadrant(checkQx, checkQy);
+                Quadrant* q = Galaxy_GetQuadrant(galaxy, checkQx, checkQy);
                 if (q != NULL) {
-                    char data[4];
+                    char data[8];
                     snprintf(data, sizeof(data), "%d%d%d", q->num_enemies, q->has_base ? 1 : 0, q->num_stars);
                     DrawTextColor(sX+1 + x*4, sY+1 + y*2, data, C_GREEN, C_BLACK, 0);
                 } else {
@@ -286,11 +297,14 @@ void Dashboard_DrawScan(ScanMode mode, const Enterprise* ent) {
             if (x < 2) Terminal_SetCell(sX+4 + x*4, bY, B_HU, C_DGRAY, C_BLACK, 0);
         }
         Terminal_SetCell(sX+12, bY, B_BR, C_DGRAY, C_BLACK, 0);
+}
+
+void Dashboard_DrawSRS(GalaxyState* galaxy, const Enterprise* ent) {
+    int sX = 18;
+    int sY = 2;
+    // SRS Mode
+    
         
-    } else {
-        // SRS Mode
-        int sX = 19;
-        int sY = 2;
         
         static int camX = -1;
         static int camY = -1;
@@ -347,7 +361,7 @@ void Dashboard_DrawScan(ScanMode mode, const Enterprise* ent) {
                 if (gx == entGX && gy == entGY) {
                     DrawTextColor(charStart, sY+1 + y*2, "<E>", C_CYAN, C_BLACK, 0);
                 } else {
-                    Quadrant* q = Galaxy_GetQuadrant(qx, qy);
+                    Quadrant* q = Galaxy_GetQuadrant(galaxy, qx, qy);
                     if (q) {
                         Sector* s = &q->sectors[sy][sx];
                         if (s->entity_type == ENTITY_STAR) {
@@ -355,7 +369,7 @@ void Dashboard_DrawScan(ScanMode mode, const Enterprise* ent) {
                         } else if (s->entity_type == ENTITY_BASE) {
                             DrawTextColor(charStart, sY+1 + y*2, ">!<", C_CYAN, C_BLACK, 0);
                         } else if (s->entity_type == ENTITY_ENEMY) {
-                            KlingonGroup* e = Galaxy_GetEnemy(s->entity_id);
+                            KlingonGroup* e = Galaxy_GetEnemy(galaxy, s->entity_id);
                             if (e && e->active) {
                                 if (e->class_id == 0) DrawTextColor(charStart, sY+1 + y*2, "+++", C_RED, C_BLACK, 0);
                                 else if (e->class_id == 1) DrawTextColor(charStart, sY+1 + y*2, "+K+", C_RED, C_BLACK, 0);
@@ -406,5 +420,121 @@ void Dashboard_DrawScan(ScanMode mode, const Enterprise* ent) {
             }
         }
         Terminal_SetCell(sX+32, bY, B_BR, C_DGRAY, C_BLACK, 0);
+}
+
+static int log_count = 0;
+static char logs[6][80];
+
+void Dashboard_AddLog(const char* format, ...) {
+    va_list args;
+    va_start(args, format);
+    for (int i = 0; i < 5; i++) {
+        strncpy(logs[i], logs[i + 1], sizeof(logs[i]) - 1);
+    }
+    vsnprintf(logs[5], sizeof(logs[5]), format, args);
+    va_end(args);
+    log_count++;
+}
+
+void Dashboard_DrawPrompt(const char* input_buffer, int cursor_blink) {
+    DrawTextColor(1, 24, "COMMAND? >", C_WHITE, C_BLACK, 0);
+    DrawTextColor(12, 24, input_buffer, C_CYAN, C_BLACK, 0);
+    
+    // Cursor piscante
+    if (cursor_blink) {
+        int len = strlen(input_buffer);
+        Terminal_SetCell(12 + len, 24, '_', C_CYAN, C_BLACK, 0);
+    }
+}
+
+void Dashboard_DrawGalaxyMap(GalaxyState* galaxy, const Enterprise* ent) {
+    if (!galaxy) return;
+
+    // Centered map. X=15 leaves exactly 15 offset with width ~50 (actually 49).
+    int sX = 14; 
+    int sY = 2;
+
+    DrawTextColor(sX + 18, 0, "GALACTIC CHART", C_WHITE, C_BLACK, 0);
+
+    // X headers
+    for (int gx = 0; gx < 12; gx++) {
+        char buf[8];
+        snprintf(buf, sizeof(buf), "%02d", gx);
+        // Each block of 3 has 12 chars. "00" takes 2 chars.
+        // gx=0 -> sX + 1(border) + 0*12 + 0*4 = sX + 1. 
+        // We want it centered over the 3 chars, so add 1.
+        int block = gx / 3;
+        int sub = gx % 3;
+        int px = sX + 1 + block * 12 + sub * 4 + 1;
+        DrawTextColor(px, 1, buf, C_WHITE, C_BLACK, 0);
+    }
+
+    int totalY = sY + 16;
+    for (int y = sY; y <= totalY; y++) {
+        int cy = y - sY;
+        if (cy % 4 == 0) {
+            // It's a border line
+            bool isTop = (cy == 0);
+            bool isBot = (cy == 16);
+            Terminal_SetCell(sX, y, isTop ? B_TL : (isBot ? B_BL : B_VR), C_DGRAY, C_BLACK, 0);
+            for (int b = 0; b < 4; b++) {
+                for (int i = 0; i < 11; i++) Terminal_SetCell(sX + 1 + b*12 + i, y, B_H, C_DGRAY, C_BLACK, 0);
+                if (b < 3) {
+                    Terminal_SetCell(sX + 12 + b*12, y, isTop ? B_HD : (isBot ? B_HU : B_X), C_DGRAY, C_BLACK, 0);
+                }
+            }
+            Terminal_SetCell(sX + 48, y, isTop ? B_TR : (isBot ? B_BR : B_VL), C_DGRAY, C_BLACK, 0);
+        } else {
+            // It's a data line
+            int gy = (cy / 4) * 3 + (cy % 4) - 1;
+            char rBuf[5];
+            snprintf(rBuf, sizeof(rBuf), "%02d", gy);
+            DrawTextColor(sX - 3, y, rBuf, C_WHITE, C_BLACK, 0);
+
+            for (int b = 0; b < 4; b++) {
+                Terminal_SetCell(sX + b*12, y, B_V, C_DGRAY, C_BLACK, 0);
+                for (int sub = 0; sub < 3; sub++) {
+                    int gx = b * 3 + sub;
+                    int px = sX + 1 + b*12 + sub*4;
+                    
+                    Quadrant* q = Galaxy_GetQuadrant(galaxy, gx, gy);
+                    bool scanned = galaxy->last_scan_date[gy][gx] > 0.0;
+                    char qData[8];
+                    
+                    if (q) {
+                        snprintf(qData, sizeof(qData), "%d%d%d", q->num_enemies, q->has_base ? 1 : 0, q->num_stars);
+                    } else {
+                        snprintf(qData, sizeof(qData), "???");
+                    }
+                    
+                    bool isHere = (ent->quadX == gx && ent->quadY == gy);
+                    
+                    if (isHere) {
+                        if (!scanned) {
+                            DrawMiddleDots(px, y, C_BLACK, C_CYAN);
+                        } else {
+                            DrawTextColor(px, y, qData, C_BLACK, C_CYAN, 0);
+                        }
+                    } else {
+                        if (!scanned) {
+                            DrawMiddleDots(px, y, C_DGRAY, C_BLACK);
+                        } else {
+                            uint8_t fg = C_GREEN;
+                            if (q && q->num_enemies > 0) fg = C_RED;
+                            DrawTextColor(px, y, qData, fg, C_BLACK, 0);
+                        }
+                    }
+                }
+            }
+            Terminal_SetCell(sX + 48, y, B_V, C_DGRAY, C_BLACK, 0);
+        }
+    }
+}
+
+void Dashboard_DrawLogs(void) {
+    // 6 logs armazenados, exibir os 4 mais recentes (indices 2..5) em y=20..23
+    for (int i = 0; i < 4; i++) {
+        uint8_t c = (i == 3) ? C_WHITE : C_DGRAY;
+        DrawTextColor(1, 20 + i, logs[2 + i], c, C_BLACK, 0);
     }
 }

@@ -3,6 +3,12 @@
 
 #include <stdint.h>
 
+typedef enum {
+    COND_GREEN,
+    COND_YELLOW,
+    COND_RED
+} Condition;
+
 typedef struct {
     double stardate;
     int quadX, quadY;
@@ -16,7 +22,7 @@ typedef struct {
     int torpedoes;
     int torpedoesMax;
     
-    char condition[10]; // "GREEN", "YELLOW", "RED"
+    Condition condition;
     
     // Integridade dos Sistemas (0.0 a 1.0)
     float sysWarp;
@@ -25,5 +31,7 @@ typedef struct {
     float sysLRS;
     float sysComputer;
 } Enterprise;
+
+void Enterprise_Init(Enterprise* ent);
 
 #endif // ENTERPRISE_H
