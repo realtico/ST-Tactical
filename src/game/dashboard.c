@@ -99,7 +99,7 @@ void Dashboard_DrawFrame(void) {
     // Dir: 53 a 79 (W=27)
     
     // Top Row
-    Terminal_SetCell(0, 0, B_TL, C_WHITE, C_BLACK, 0);
+    Terminal_SetCell(0, 0, B_TL, C_DGRAY, C_BLACK, 0);
     for(int x=1; x<=14; x++) Terminal_SetCell(x, 0, B_H, C_DGRAY, C_BLACK, 0);
     Terminal_SetCell(15, 0, B_HD, C_DGRAY, C_BLACK, 0); // ┬
     for(int x=16; x<=51; x++) Terminal_SetCell(x, 0, B_H, C_DGRAY, C_BLACK, 0);
