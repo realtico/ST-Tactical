@@ -5,6 +5,7 @@
 #include "game/enterprise.h"
 #include <stdio.h>
 #include <string.h>
+#include <time.h>
 
 // Estado global do jogo
 static Enterprise ent;
@@ -36,11 +37,11 @@ int main(void) {
     }
 
     // Inicializar galáxia e Enterprise
-    Galaxy_Generate(&galaxy, 1701);
+    Galaxy_Generate(&galaxy, (uint32_t)time(NULL));
     Enterprise_Init(&ent);
 
     // Marcar quadrante inicial como explorado (SRS scan)
-    Galaxy_UpdateSensors(&galaxy, ent.quadX, ent.quadY, ent.stardate, false);
+    Galaxy_UpdateSensors(&galaxy, (int)(ent.x / 8), (int)(ent.y / 8), ent.stardate, false);
 
     Commands_Init();
     Dashboard_AddLog("STARDATE %.1f - ENTERPRISE READY.", ent.stardate);
@@ -49,24 +50,24 @@ int main(void) {
     char input_buf[33] = {0};  // Limite de 32 caracteres + null
     int input_len = 0;
     int cursor_timer = 0;
-    int prevQuadX = ent.quadX;
-    int prevQuadY = ent.quadY;
+    int prevQuadX = (int)(ent.x / 8);
+    int prevQuadY = (int)(ent.y / 8);
 
     while (!WindowShouldClose() && !Commands_ShouldQuit()) {
         // --- Input: Movimento ---
-        if (IsKeyPressed(KEY_RIGHT) && ent.sectX < 95) ent.sectX++;
-        if (IsKeyPressed(KEY_LEFT)  && ent.sectX > 0)  ent.sectX--;
-        if (IsKeyPressed(KEY_DOWN)  && ent.sectY < 95) ent.sectY++;
-        if (IsKeyPressed(KEY_UP)    && ent.sectY > 0)  ent.sectY--;
+        if (IsKeyPressed(KEY_RIGHT) && ent.x < 95.0f) ent.x++;
+        if (IsKeyPressed(KEY_LEFT)  && ent.x > 0.0f)  ent.x--;
+        if (IsKeyPressed(KEY_DOWN)  && ent.y < 95.0f) ent.y++;
+        if (IsKeyPressed(KEY_UP)    && ent.y > 0.0f)  ent.y--;
 
-        ent.quadX = ent.sectX / 8;
-        ent.quadY = ent.sectY / 8;
+        int currentQuadX = (int)(ent.x / 8);
+        int currentQuadY = (int)(ent.y / 8);
 
         // Ao mudar de quadrante, atualizar sensores
-        if (ent.quadX != prevQuadX || ent.quadY != prevQuadY) {
-            Galaxy_UpdateSensors(&galaxy, ent.quadX, ent.quadY, ent.stardate, false);
-            prevQuadX = ent.quadX;
-            prevQuadY = ent.quadY;
+        if (currentQuadX != prevQuadX || currentQuadY != prevQuadY) {
+            Galaxy_UpdateSensors(&galaxy, currentQuadX, currentQuadY, ent.stardate, false);
+            prevQuadX = currentQuadX;
+            prevQuadY = currentQuadY;
         }
 
         // --- Input: Prompt de comando ---
@@ -84,9 +85,18 @@ int main(void) {
         if (IsKeyPressed(KEY_ENTER)) {
             if (input_len > 0) {
                 Dashboard_AddLog("> %s", input_buf);
-                Commands_Execute(input_buf);
+                Commands_Execute(input_buf, &ent, &galaxy);
                 input_len = 0;
                 input_buf[0] = '\0';
+
+                // Recalcular quadrante se houve warp/impulse
+                currentQuadX = (int)(ent.x / 8);
+                currentQuadY = (int)(ent.y / 8);
+                if (currentQuadX != prevQuadX || currentQuadY != prevQuadY) {
+                    Galaxy_UpdateSensors(&galaxy, currentQuadX, currentQuadY, ent.stardate, false);
+                    prevQuadX = currentQuadX;
+                    prevQuadY = currentQuadY;
+                }
             }
         }
 
@@ -95,7 +105,7 @@ int main(void) {
 
         // Ao ativar LRS, fazer scan de longo alcance
         if (currentMode == SCAN_MODE_LRS) {
-            Galaxy_UpdateSensors(&galaxy, ent.quadX, ent.quadY, ent.stardate, true);
+            Galaxy_UpdateSensors(&galaxy, currentQuadX, currentQuadY, ent.stardate, true);
         }
 
         cursor_timer++;

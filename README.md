@@ -51,9 +51,16 @@ Once compiled, you can run the test environment:
 *(On Windows, the executable will be `build\Release\ST_Tactical.exe`)*
 
 ## 🕹️ Controls (Test Environment)
-- **Arrows**: Move the testing cursor.
-- **Spacebar**: Toggle Scan mockups (SRS / LRS).
-- **1, 2, 3**: Switch between resolutions (80x25, 100x32, 132x42).
+- **Arrows**: Move the local camera cursor.
+- **Type commands directly in the prompt**: (Press Enter to execute)
+  - `SRS`: Short Range Scan
+  - `LRS`: Long Range Scan
+  - `MAP`: Galaxy Map / Chart
+  - `IMP <X> <Y>`: Impulse engines to (X, Y) coordinates. Uses energy.
+  - `WRP <X> <Y> <FATOR>`: Warp engine to (X, Y) at given warp factor [1-8]. Uses energy.
+  - `SHI <AMOUNT>`: Transfer energy between shields and main reserves (use negative values to drain shields).
+  - `HELP`: Display available commands.
+  - `QUIT`: Exit game.
 
 ## 🗂️ Architecture
 * `/include/video/terminal.h`: The API for the VRAM and Virtual Monitor.

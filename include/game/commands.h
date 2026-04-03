@@ -5,7 +5,7 @@
 #include <stdbool.h>
 
 // Callback de comando: recebe argc/argv tokenizados
-typedef void (*CmdHandler)(int argc, char** argv);
+typedef void (*CmdHandler)(int argc, char** argv, Enterprise* ent, GalaxyState* galaxy);
 
 typedef struct {
     const char* cmd_name;
@@ -17,7 +17,7 @@ typedef struct {
 void Commands_Init(void);
 
 // Executa uma linha de input (tokeniza e despacha)
-void Commands_Execute(const char* input);
+void Commands_Execute(const char* input, Enterprise* ent, GalaxyState* galaxy);
 
 // Retorna o modo de scan atual (alterado por comandos SRS/LRS/MAP)
 ScanMode Commands_GetScanMode(void);

@@ -168,11 +168,11 @@ void Dashboard_DrawEnterpriseStats(const Enterprise* ent) {
     DrawTextColor(3, 4, buf, C_CYAN, C_BLACK, 0);
     
     DrawTextColor(2, 6, "QUADRANT:", C_WHITE, C_BLACK, 0);
-    snprintf(buf, sizeof(buf), "%02d, %02d", ent->quadX, ent->quadY);
+    snprintf(buf, sizeof(buf), "%02d, %02d", (int)(ent->x / 8), (int)(ent->y / 8));
     DrawTextColor(3, 7, buf, C_CYAN, C_BLACK, 0);
     
     DrawTextColor(2, 9, "SECTOR:", C_WHITE, C_BLACK, 0);
-    snprintf(buf, sizeof(buf), "%02d, %02d", ent->sectX, ent->sectY);
+    snprintf(buf, sizeof(buf), "%02d, %02d", (int)(ent->x), (int)(ent->y));
     DrawTextColor(3, 10, buf, C_CYAN, C_BLACK, 0);
     
     // Damage Rept
@@ -207,7 +207,7 @@ void Dashboard_DrawEnterpriseStats(const Enterprise* ent) {
 
     DrawTextColor(54, 7, "SHIELDS:  ", C_WHITE, C_BLACK, 0);
     DrawProgressBar(65, 7, ent->shields, ent->shieldsMax, 10, C_CYAN, C_DGRAY, C_BLACK);
-    snprintf(buf, sizeof(buf), "(%d%%)", ent->shieldsMax > 0 ? (int)(((float)ent->shields/(float)ent->shieldsMax)*100) : 0);
+    snprintf(buf, sizeof(buf), "(%d/%d)", ent->shields, ent->shieldsMax);
     DrawTextColor(56, 8, buf, C_WHITE, C_BLACK, 0);
     
     DrawTextColor(54, 10, "TORPEDOES:", C_WHITE, C_BLACK, 0);
@@ -225,7 +225,7 @@ void Dashboard_DrawLRS(GalaxyState* galaxy, const Enterprise* ent) {
         // Header
         char colHeader[40] = "";
         for (int x = 0; x < 3; x++) {
-            int checkQx = ent->quadX - 1 + x;
+            int checkQx = (int)(ent->x / 8) - 1 + x;
             if (checkQx >= 0 && checkQx < 12) {
                 char buf[5]; snprintf(buf, sizeof(buf), "%02d  ", checkQx);
                 strcat(colHeader, buf);
@@ -248,7 +248,7 @@ void Dashboard_DrawLRS(GalaxyState* galaxy, const Enterprise* ent) {
         
         // 3x3 Grid
         for (int y = 0; y < 3; y++) {
-            int checkQy = ent->quadY - 1 + y;
+            int checkQy = (int)(ent->y / 8) - 1 + y;
             if (checkQy >= 0 && checkQy < 12) {
                 char rBuf[5];
                 snprintf(rBuf, sizeof(rBuf), "%02d", checkQy);
@@ -259,8 +259,8 @@ void Dashboard_DrawLRS(GalaxyState* galaxy, const Enterprise* ent) {
                 Terminal_SetCell(sX + x*4, sY+1 + y*2, B_V, C_DGRAY, C_BLACK, 0);
                 
                 // Get Galaxy Data Relative to Enterprise
-                int checkQx = ent->quadX - 1 + x;
-                int checkQy = ent->quadY - 1 + y;
+                int checkQx = (int)(ent->x / 8) - 1 + x;
+                int checkQy = (int)(ent->y / 8) - 1 + y;
                 
                 Quadrant* q = Galaxy_GetQuadrant(galaxy, checkQx, checkQy);
                 if (q != NULL) {
@@ -308,8 +308,8 @@ void Dashboard_DrawSRS(GalaxyState* galaxy, const Enterprise* ent) {
         
         static int camX = -1;
         static int camY = -1;
-        int entGX = ent->sectX;
-        int entGY = ent->sectY;
+        int entGX = (int)(ent->x);
+        int entGY = (int)(ent->y);
         
         if (camX == -1 || entGX < camX || entGX >= camX + 8 || entGY < camY || entGY >= camY + 8) {
             camX = entGX - 3;
@@ -507,7 +507,7 @@ void Dashboard_DrawGalaxyMap(GalaxyState* galaxy, const Enterprise* ent) {
                         snprintf(qData, sizeof(qData), "???");
                     }
                     
-                    bool isHere = (ent->quadX == gx && ent->quadY == gy);
+                    bool isHere = ((int)(ent->x / 8) == gx && (int)(ent->y / 8) == gy);
                     
                     if (isHere) {
                         if (!scanned) {

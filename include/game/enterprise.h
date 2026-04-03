@@ -2,6 +2,7 @@
 #define ENTERPRISE_H
 
 #include <stdint.h>
+#include <stdbool.h>
 
 typedef enum {
     COND_GREEN,
@@ -10,9 +11,7 @@ typedef enum {
 } Condition;
 
 typedef struct {
-    double stardate;
-    int quadX, quadY;
-    int sectX, sectY;
+    float x, y;          // Posição no grid 96x96
     
     // Recursos (Sistemas de Barras)
     int energy;
@@ -21,6 +20,9 @@ typedef struct {
     int shieldsMax;
     int torpedoes;
     int torpedoesMax;
+    
+    double stardate;
+    bool is_docked;
     
     Condition condition;
     
@@ -33,5 +35,8 @@ typedef struct {
 } Enterprise;
 
 void Enterprise_Init(Enterprise* ent);
+
+bool calculate_impulse(float dist, int *out_e, float *out_t);
+bool calculate_warp(float dist, float w, int *out_e, float *out_t);
 
 #endif // ENTERPRISE_H
